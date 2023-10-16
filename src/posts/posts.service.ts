@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreatePostInput } from './dto/create-post.input';
 import { PostFilterInput } from './dto/post-filter.input';
+import { PostSortInput } from './dto/post-sort.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import { Post, PostDocument } from './schemas/post.schema';
 
@@ -16,7 +17,7 @@ export class PostsService {
     return this.postModel.create(createPostInput);
   }
 
-  handleFilter(filter: PostFilterInput) {
+  private handleFilter(filter: PostFilterInput) {
     const query = {};
 
     if (filter.and || filter.or) {
@@ -83,9 +84,22 @@ export class PostsService {
     return query;
   }
 
-  findAll(filter?: PostFilterInput) {
+  private handleSort(sort: PostSortInput): any {
+    const sortQuery = {};
+
+    for (const key in sort) {
+      if (Object.prototype.hasOwnProperty.call(sort, key)) {
+        sortQuery[key] = sort[key] === 'ASC' ? 1 : -1;
+      }
+    }
+
+    return sortQuery;
+  }
+
+  findAll(filter?: PostFilterInput, sort?: PostSortInput) {
     const query = filter ? this.handleFilter(filter) : {};
-    return this.postModel.find(query);
+    const sortQuery = this.handleSort(sort);
+    return this.postModel.find(query).sort(sortQuery);
   }
 
   findOne(id: Types.ObjectId) {

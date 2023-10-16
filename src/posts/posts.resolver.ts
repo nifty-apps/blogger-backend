@@ -2,6 +2,7 @@ import { Args, ID, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Types } from 'mongoose';
 import { CreatePostInput } from './dto/create-post.input';
 import { PostFilterInput } from './dto/post-filter.input';
+import { PostSortInput } from './dto/post-sort.input';
 import { UpdatePostInput } from './dto/update-post.input';
 import { PostsService } from './posts.service';
 import { Post } from './schemas/post.schema';
@@ -16,8 +17,11 @@ export class PostsResolver {
   }
 
   @Query(() => [Post], { name: 'posts' })
-  findAll(@Args('filter', { nullable: true }) filter?: PostFilterInput) {
-    return this.postsService.findAll(filter);
+  findAll(
+    @Args('filter', { nullable: true }) filter?: PostFilterInput,
+    @Args('sort', { nullable: true }) sort?: PostSortInput,
+  ) {
+    return this.postsService.findAll(filter, sort);
   }
 
   @Query(() => Post, { name: 'post' })
